@@ -55,13 +55,13 @@
       <HintPath>..\SharpGL.WinForms\GlmNet.dll</HintPath>
     </Reference>
     <Reference Include="SharpGL">
-      <HintPath>..\SharpGL.WinForms\SharpGL.dll</HintPath>
+      <HintPath>..\packages\SharpGL.3.1.1\lib\net45\SharpGL.dll</HintPath>
     </Reference>
     <Reference Include="SharpGL.SceneGraph">
-      <HintPath>..\SharpGL.WinForms\SharpGL.SceneGraph.dll</HintPath>
+      <HintPath>..\packages\SharpGL.SceneGraph.3.1.1\lib\net45\SharpGL.SceneGraph.dll</HintPath>
     </Reference>
     <Reference Include="SharpGL.WinForms">
-      <HintPath>..\SharpGL.WinForms\SharpGL.WinForms.dll</HintPath>
+      <HintPath>..\packages\SharpGL.WinForms.3.1.1\lib\net45\SharpGL.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -74,6 +74,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Design" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
@@ -115,6 +116,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="packages.config" />
+    <Compile Include="Constants.cs" />
+    <None Include="SharpGL.png" />
+    <None Include="SharpGL.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

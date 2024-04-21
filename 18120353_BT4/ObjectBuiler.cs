@@ -2,23 +2,22 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-
-
+using static ObjectBuilder.ObjectBuilder.Constants;
 
 namespace ObjectBuilder
 {
     public partial class ObjectBuiler : Form
     {
-        List<Object> listObjects = new List<Object>();
-        Camera camera = new Camera(Constants.CameraUnit);
-        Object currentObject = new Object();
+        readonly Camera _camera = new Camera(CameraUnit);
+        Object _currentObject = new Object();
+        readonly List<Object> _objects = new List<Object>();
 
         public ObjectBuiler()
         {
             InitializeComponent();
 
             //we don't wan't enabled feature buttons when non object selected.
-            EnabledButtonsClick(false);
+            SetInteractableButtons(false);
         }
 
         private void openGLControl1_OpenGLInitialized(object sender, EventArgs e)
@@ -41,7 +40,7 @@ namespace ObjectBuilder
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
 
             //set view matrix mode to transform world space to clip space (transform the projection matrix).
-            camera.UpdateLookAt(gl);
+            _camera.UpdateLookAt(gl);
 
             //set current matrix mode to transform view space to clip space, we use perspective mode
             gl.MatrixMode(OpenGL.GL_PROJECTION);
@@ -53,7 +52,7 @@ namespace ObjectBuilder
                 openGLControl1.Width,
                 openGLControl1.Height);
 
-            camera.ZoomCamera("In");
+            _camera.Zoom(CameraZoom.In);
         }
 
         private void openGLControl1_OpenGLDraw(object sender, RenderEventArgs args)
@@ -66,28 +65,28 @@ namespace ObjectBuilder
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
 
             //transform the projection matrix.
-            camera.UpdateLookAt(gl);
+            _camera.UpdateLookAt(gl);
 
             // Load the identity.
             gl.LoadIdentity();
 
             //transform the projection matrix
-            camera.UpdateLookAt(gl);
+            _camera.UpdateLookAt(gl);
 
             //create grid map
-            GridMap gridMap = new GridMap(Constants.WorldUnit);
+            GridMap gridMap = new GridMap(WorldUnit);
 
             // Draw a grid map with parameter 2 is the size.
-            gridMap.DrawGridMap(gl, 10 * Constants.WorldUnit);
+            gridMap.DrawGridMap(gl, 10 * WorldUnit);
 
             //drawing all objects.
-            foreach (Object obj in listObjects)
+            foreach (Object obj in _objects)
             {
                 //update ischoose to select a fit outline
-                if (obj == currentObject)
-                    obj.IsChoose = true;
+                if (obj == _currentObject)
+                    obj.IsChoosed = true;
                 else
-                    obj.IsChoose = false;
+                    obj.IsChoosed = false;
 
                 obj.DrawSoildObject(gl);
             }
@@ -108,157 +107,141 @@ namespace ObjectBuilder
             switch (keyData)
             {
                 case Keys.Z:
-                    camera.ZoomCamera("In");
+                    _camera.Zoom(CameraZoom.In);
                     break;
                 case Keys.X:
-                    camera.ZoomCamera("Out");
+                    _camera.Zoom(CameraZoom.Out);
                     break;
                 case Keys.Left:
-                    camera.RotateCamera("Left");
+                    _camera.Rotate(CameraRotate.Left);
                     break;
                 case Keys.Right:
-                    camera.RotateCamera("Right");
+                    _camera.Rotate(CameraRotate.Right);
                     break;
                 case Keys.Up:
-                    camera.RotateCamera("Up");
+                    _camera.Rotate(CameraRotate.Up);
                     break;
                 case Keys.Down:
-                    camera.RotateCamera("Down");
+                    _camera.Rotate(CameraRotate.Down);
                     break;
+
                 default:
                     break;
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // Creating object methods
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //Create object method
 
         private void CreateCube_CLick(object sender, EventArgs e)
         {
-            //create object
             Cube cube = new Cube();
 
-            //add the new object to list and UI list
-            listObjects.Add(cube);
-
+            _objects.Add(cube);
             listBoxObjects.Items.Add(cube);
         }
         private void CreatePrism_CLick(object sender, EventArgs e)
         {
-            //create object
             Prism prism = new Prism();
 
-            //add the new object to list and UI list
-            listObjects.Add(prism);
-
+            _objects.Add(prism);
             listBoxObjects.Items.Add(prism);
         }
         private void CreatePyramid_Click(object sender, EventArgs e)
         {
-            //create object
             Pyramid pyramid = new Pyramid();
 
-            //add the new object to list and UI list
-            listObjects.Add(pyramid);
-
+            _objects.Add(pyramid);
             listBoxObjects.Items.Add(pyramid);
         }
 
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //Update transform methods
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //Update transform method
         private void TranslateX_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(TranslateX.Text, out value))
+            if (float.TryParse(TranslateX.Text, out var value))
             {
-                currentObject.Transform.Translate.X = value;
+                _currentObject.Transform.Translate.X = value;
             }
         }
 
         private void TranslateY_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(TranslateY.Text, out value))
+            if (float.TryParse(TranslateY.Text, out var value))
             {
-                currentObject.Transform.Translate.Y = value;
+                _currentObject.Transform.Translate.Y = value;
             }
         }
 
         private void TranslateZ_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(TranslateZ.Text, out value))
+            if (float.TryParse(TranslateZ.Text, out var value))
             {
-                currentObject.Transform.Translate.Z = value;
+                _currentObject.Transform.Translate.Z = value;
             }
         }
 
         private void RotateX_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(RotateX.Text, out value))
+            if (float.TryParse(RotateX.Text, out var value))
             {
-                currentObject.Transform.Rotate.X = value;
+                _currentObject.Transform.Rotate.X = value;
             }
         }
 
         private void RotateY_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(RotateY.Text, out value))
+            if (float.TryParse(RotateY.Text, out var value))
             {
-                currentObject.Transform.Rotate.Y = value;
+                _currentObject.Transform.Rotate.Y = value;
             }
         }
 
         private void RotateZ_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(RotateZ.Text, out value))
+            if (float.TryParse(RotateZ.Text, out var value))
             {
-                currentObject.Transform.Rotate.Z = value;
+                _currentObject.Transform.Rotate.Z = value;
             }
         }
 
         private void ScaleX_TextChanged(object sender, EventArgs e)
         {
-            float value;
-
-            if (float.TryParse(ScaleX.Text, out value))
+            if (float.TryParse(ScaleX.Text, out var value))
             {
-                currentObject.Transform.Scale.X = value;
+                _currentObject.Transform.Scale.X = value;
             }
         }
 
         private void ScaleY_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(ScaleY.Text, out value))
+            if (float.TryParse(ScaleY.Text, out var value))
             {
-                currentObject.Transform.Scale.Y = value;
+                _currentObject.Transform.Scale.Y = value;
             }
         }
 
         private void ScaleZ_TextChanged(object sender, EventArgs e)
         {
-            float value;
-            if (float.TryParse(ScaleZ.Text, out value))
+            if (float.TryParse(ScaleZ.Text, out var value))
             {
-                currentObject.Transform.Scale.Z = value;
+                _currentObject.Transform.Scale.Z = value;
             }
         }
 
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // UI input operations
         //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void ButtonColor_Click(object sender, EventArgs e)
         {
             if (colorDialog1.ShowDialog() == DialogResult.OK)
-                currentObject.Color = colorDialog1.Color;
+            {
+                _currentObject.Color = colorDialog1.Color;
+            }
         }
 
         private void listObject_MouseClick(object sender, MouseEventArgs e)
@@ -270,13 +253,13 @@ namespace ObjectBuilder
             if (currentIndex != -1)
             {
                 //enable features
-                EnabledButtonsClick(true);
+                SetInteractableButtons(true);
 
                 //change current object by mouse position
-                currentObject = listObjects[currentIndex];
+                _currentObject = _objects[currentIndex];
 
                 //change transform boxes
-                UpdateTranformBoxes(currentObject);
+                UpdateTranformBoxes(_currentObject);
                 
             }
         }
@@ -286,9 +269,9 @@ namespace ObjectBuilder
         {
             if (TextureFile.ShowDialog() == DialogResult.OK)
             {
-                if (currentObject != null)
+                if (_currentObject != null)
                 {
-                    currentObject.TexturePath = (TextureFile.FileName);
+                    _currentObject.TexturePath = TextureFile.FileName;
                     openGLControl1.Invalidate();
                 }
             }
@@ -296,55 +279,54 @@ namespace ObjectBuilder
 
         private void ButtonRemove_Click(object sender, EventArgs e)
         {
-            if (listBoxObjects.Items.Contains(currentObject) && listObjects.Contains(currentObject))
+            if (listBoxObjects.Items.Contains(_currentObject) && _objects.Contains(_currentObject))
             {
-                listBoxObjects.Items.Remove(currentObject);
-                listObjects.Remove(currentObject);
-                currentObject = null;
+                listBoxObjects.Items.Remove(_currentObject);
+                _objects.Remove(_currentObject);
+                _currentObject = null;
             }
         }
-        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-       
-        //we don't wan't enabled feature buttons when non object selected.
-        private void EnabledButtonsClick(bool mode)
+
+        private void Instructor_Click(object sender, EventArgs e)
         {
-            if (mode)
+            MessageBox.Show(InstructionText);
+        }
+
+        private void ButtonCancle_Click(object sender, EventArgs e)
+        {
+            if (_objects != null)
             {
-                TranslateX.Enabled = true;
-                TranslateY.Enabled = true;
-                TranslateZ.Enabled = true;
-
-                RotateX.Enabled = true;
-                RotateY.Enabled = true;
-                RotateZ.Enabled = true;
-
-                ScaleX.Enabled = true;
-                ScaleY.Enabled = true;
-                ScaleZ.Enabled = true;
-
-                ButtonTexture.Enabled = true;
-                ButtonColor.Enabled = true;
-                ButtonRemove.Enabled = true;
+                _currentObject = null;
+                SetInteractableButtons(false);
             }
             else
             {
-                TranslateX.Enabled = false;
-                TranslateY.Enabled = false;
-                TranslateZ.Enabled = false;
-
-                RotateX.Enabled = false;
-                RotateY.Enabled = false;
-                RotateZ.Enabled = false;
-
-                ScaleX.Enabled = false;
-                ScaleY.Enabled = false;
-                ScaleZ.Enabled = false;
-
-                ButtonTexture.Enabled = false;
-                ButtonColor.Enabled = false;
-                ButtonRemove.Enabled = false;
+                MessageBox.Show("No object selected.");
             }
+        }
+
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // UI interactions
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // we don't wan't enabled feature buttons when non object selected.
+        private void SetInteractableButtons(bool interactable)
+        {
+            TranslateX.Enabled = interactable;
+            TranslateY.Enabled = interactable;
+            TranslateZ.Enabled = interactable;
+
+            RotateX.Enabled = interactable;
+            RotateY.Enabled = interactable;
+            RotateZ.Enabled = interactable;
+
+            ScaleX.Enabled = interactable;
+            ScaleY.Enabled = interactable;
+            ScaleZ.Enabled = interactable;
+
+            ButtonTexture.Enabled = interactable;
+            ButtonColor.Enabled = interactable;
+            ButtonRemove.Enabled = interactable;            
         }
 
         //update transform boxes when we change current object 
@@ -366,30 +348,10 @@ namespace ObjectBuilder
         //show eye coordinate on the screen
         private void ShowEyeCoord()
         {
-            CameraLabelX.Text = Math.Round(camera.EyeCoordX, 2).ToString();
-            CameraLabelY.Text = Math.Round(camera.EyeCoordY, 2).ToString();
-            CameraLabelZ.Text = Math.Round(camera.EyeCoordZ, 2).ToString();
+            CameraLabelX.Text = Math.Round(_camera.EyeCoord.X, 2).ToString();
+            CameraLabelY.Text = Math.Round(_camera.EyeCoord.Y, 2).ToString();
+            CameraLabelZ.Text = Math.Round(_camera.EyeCoord.Z, 2).ToString();
 
         }
-
-        private void Instructor_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("--------------------*Developer: Chi Cam Hao - HCMUS*------------------- \n \n 1. You need to create 3D objects first. \n 2. Click on that object's name shows on the blue box. \n 3. When your object has the orange outline, the features are yours. \n 4. Use camera: Arrow keys + 'Z' + 'X'. But first, you must 'Cancel' the current object.  \n 5. Believe me, you don't want to translate your objects with any number > 10.\n \n Hope you have a good time!");
-        }
-
-        private void ButtonCancle_Click(object sender, EventArgs e)
-        {
-            if (currentObject != null)
-            {
-                currentObject = null;
-                EnabledButtonsClick(false);
-            }
-            else
-            {
-                MessageBox.Show("No object selected.");
-            }
-        }
-
-
     }
 }

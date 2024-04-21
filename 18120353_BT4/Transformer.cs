@@ -1,8 +1,9 @@
-﻿using SharpGL;
-using System;
+﻿using ObjectBuilder.ObjectBuilder;
+using SharpGL;
+
 namespace ObjectBuilder
 {
-    class Transformer
+    public sealed class Transformer
     {
         private Vector TranslateCoord;
         private Vector RotateCoord;
@@ -10,9 +11,9 @@ namespace ObjectBuilder
 
         public Transformer()
         {
-            TranslateCoord = new Vector();
-            RotateCoord = new Vector();
-            ScaleCoord = new Vector(1, 1, 1);
+            TranslateCoord = Vector.Default;
+            RotateCoord = Vector.Default;
+            ScaleCoord = new Vector(Constants.WorldUnit, Constants.WorldUnit, Constants.WorldUnit);
         }
 
         public Vector Translate 

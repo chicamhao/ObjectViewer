@@ -2,27 +2,23 @@
 
 namespace ObjectBuilder
 {
-    class GridMap
+    public sealed class GridMap
     {
-        private uint UnitMap;
-
-        public GridMap(){
-            this.UnitMap = 1;
-        }
+        private readonly uint _unitMap;
 
         public GridMap(uint worldUnit)
         {
-            this.UnitMap = worldUnit;
+            _unitMap = worldUnit;
         }
 
         public void DrawGridMap(OpenGL gl, uint SizeOfMap)
         {
-            float HalfOfMap = SizeOfMap / 2* UnitMap;
-            float QuarterOfMap = SizeOfMap / 4* UnitMap;
-            float SizeOfGid = (float)SizeOfMap / 20* UnitMap;
+            float HalfOfMap = SizeOfMap / 2 * _unitMap;
+            float QuarterOfMap = SizeOfMap / 4 * _unitMap;
+            float SizeOfGid = (float)SizeOfMap / 20 * _unitMap;
 
             //1. draw grid map coordinates x, y, z
-            gl.LineWidth(3.0f* UnitMap);
+            gl.LineWidth(3.0f * _unitMap);
             gl.Begin(OpenGL.GL_LINES);
 
             //x with red
