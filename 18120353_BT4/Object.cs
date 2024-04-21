@@ -1,82 +1,72 @@
-﻿using SharpGL;
+﻿using ObjectBuilder.ObjectBuilder;
+using SharpGL;
 using SharpGL.SceneGraph.Assets;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace ObjectBuilder
 {
-    static class Constants
-    {
-        public const double PI = 3.14159;
-        public const uint WorldUnit = 1;
-        public const float CameraUnit = 0.05f;
-
-    }
-
-    class Object
+    public class Object
     {
         //vertices's coordinates x, y, z
-        protected double[,] mVertices;
+        protected double[,] _mVertices;
 
         //vertice's indices.
-        protected int[,] indicesObject;
-        protected int[,] indicesOutLine;
+        protected int[,] _indicesObject;
+        protected int[,] _indicesOutLine;
 
-        protected Color color;
-        protected Color linecolor;
+        protected Color _color;
+        protected Color _lineColor;
 
-        protected Transformer transformer;
-        protected double unit;
+        protected Transformer _transformer;
+        protected double _unit;
 
         //texture
-        protected double[,] mTextures;
-        protected Texture texture;
-        protected string texturePath;
+        protected double[,] _mTextures;
+        protected Texture _texture;
+        protected string _texturePath;
 
-        protected bool isChoose = false;
-
+        protected bool _isChoosed;
 
         //properties
         public string TexturePath
         {
-            get => this.texturePath;
-            set { this.texturePath = value; }
+            get => _texturePath;
+            set { _texturePath = value; }
         }
-        public bool IsChoose {
-            get => this.isChoose;
-            set { this.isChoose = value; }
-}
+
+        public bool IsChoosed
+        {
+            get => _isChoosed;
+            set { _isChoosed = value; }
+        }
+
         public Transformer Transform
         {
-            get => this.transformer;
-            set { this.transformer = value; }
+            get => _transformer;
+            set { _transformer = value; }
         }
 
         public Color Color
         {
-            get => this.color;
-            set { this.color = value;  }
+            get => _color;
+            set { _color = value;  }
         }
 
         public Texture Texture
         {
-            get => this.texture;
-            set { this.texture = value; }
+            get => _texture;
+            set { _texture = value; }
         }
+
         public Object()
         {
-            color = new Color();
-            color = Color.White;
+            _color = Color.White;
+            _lineColor = Color.Black;
 
-            linecolor = new Color();
-            linecolor = Color.Black;
-
-            transformer = new Transformer();
-            texture = new Texture();
-            unit = 1.0f;
+            _transformer = new Transformer();
+            _texture = new Texture();
+            _unit = Constants.WorldUnit;
         }
-
         
         //method
         public virtual void DrawObject(OpenGL gl) { }
@@ -85,7 +75,7 @@ namespace ObjectBuilder
 
         public void UpdateOutLine(OpenGL gl)
         {
-            if (this.isChoose)
+            if (_isChoosed)
             {
                 //setup width and color.
                 gl.LineWidth(3f);
@@ -103,14 +93,15 @@ namespace ObjectBuilder
                 //setup black color for soild object.
 
                 //setup color.
-                gl.Color(linecolor.R, linecolor.G, linecolor.B);
+                gl.Color(_lineColor.R, _lineColor.G, _lineColor.B);
             }
         }
+
         public void DrawSoildObject(OpenGL gl)
         {
             gl.PushMatrix();
 
-            transformer.UpdateTransform(gl);
+            _transformer.UpdateTransform(gl);
 
             DrawObject(gl);
 
@@ -120,8 +111,7 @@ namespace ObjectBuilder
 
             gl.PopMatrix();
         }
+
         ~Object() { }
-
-
     }
 }

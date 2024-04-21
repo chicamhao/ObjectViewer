@@ -1,5 +1,6 @@
 ﻿using System;
 using SharpGL;
+using static ObjectBuilder.ObjectBuilder.Constants;
 
 namespace ObjectBuilder
 {
@@ -8,92 +9,68 @@ namespace ObjectBuilder
       * That shere placed in center of world coordinate (0,0) with 3 orthogonal axes: X, Y, Z
       * fields: "theta" is angle between X and Z, "phi" is between angle Y and GidMap, "radius" is radius of the sphere. 
       */
-    public class Camera
+    public sealed class Camera
     {
         //Camera's feilds
-        private Vector EyeCoord;
-        private Vector LookAtCoord;
+        public Vector EyeCoord => _eyeCoord;
+        private readonly Vector _eyeCoord;
+
+        private readonly Vector _lookAtCoord;
         
         //weight of transform
-        private float CameraUnit;
+        private readonly float _cameraUnit;
 
-        //transparent sphere's feilds
-        private double radius;
-        private double theta;
-        private double phi;
-
-   
-        //constructors
-        public Camera()
-        {
-            CameraUnit = 1;
-            EyeCoord = new Vector(10, 10, 10);
-            LookAtCoord = new Vector();
-
-            UpdateValue();
-        }
+        //transparent sphere's fields
+        private double _radius;
+        private double _theta;
+        private double _phi;
 
         public Camera(float unit)
         {
-            CameraUnit = unit;
+            _cameraUnit = unit;
 
-            EyeCoord = new Vector(3.16f, 3.16f, 3.16f);
-            LookAtCoord = new Vector();
+            _eyeCoord = new Vector(3.16f, 3.16f, 3.16f);
+            _lookAtCoord = Vector.Default;
 
-            UpdateValue();
+            CalculateSphereFields();
         }
-
-        //properties
-        public double EyeCoordX
-        {
-            get => EyeCoord.X;
-        }
-        public double EyeCoordY
-        {
-            get => EyeCoord.Y;
-        }
-        public double EyeCoordZ
-        {
-            get => EyeCoord.Z;
-        }
-
 
         //string mode: In/Out
-        public void ZoomCamera(string ZoomMode)
+        public void Zoom(CameraZoom mode)
         {
-            switch (ZoomMode)
+            switch (mode)
             {
-                case "In":
-                    EyeCoord.X += -CameraUnit * EyeCoord.X;
-                    EyeCoord.Y += -CameraUnit * EyeCoord.Y;
-                    EyeCoord.Z += -CameraUnit * EyeCoord.Z;
+                case CameraZoom.In:
+                    EyeCoord.X += -_cameraUnit * EyeCoord.X;
+                    EyeCoord.Y += -_cameraUnit * EyeCoord.Y;
+                    EyeCoord.Z += -_cameraUnit * EyeCoord.Z;
                     break;
-                case "Out":
-                    EyeCoord.X += CameraUnit * EyeCoord.X;
-                    EyeCoord.Y += CameraUnit * EyeCoord.Y;
-                    EyeCoord.Z += CameraUnit * EyeCoord.Z;
+
+                case CameraZoom.Out:
+                    EyeCoord.X += _cameraUnit * EyeCoord.X;
+                    EyeCoord.Y += _cameraUnit * EyeCoord.Y;
+                    EyeCoord.Z += _cameraUnit * EyeCoord.Z;
                     break;
+
                 default:
-                    break;
+                    throw new NotImplementedException($"{mode}");
             }
-            
-            //update sphere's feilds
-            UpdateValue();
+
+            CalculateSphereFields();
         }
 
-
-        private void UpdateValue()
+        private void CalculateSphereFields()
         {
             //update angle between X and Z
-            theta = Math.Atan((EyeCoord.X - LookAtCoord.X) / (EyeCoord.Z - LookAtCoord.Z));
+            _theta = Math.Atan((EyeCoord.X - _lookAtCoord.X) / (EyeCoord.Z - _lookAtCoord.Z));
 
             //update angle between Y and GridMap
-            phi = Math.Asin((EyeCoord.Y - LookAtCoord.Y) / radius);
+            _phi = Math.Asin((EyeCoord.Y - _lookAtCoord.Y) / _radius);
 
             //update radius of the sphere
-            radius = Math.Sqrt(Math.Pow(EyeCoord.X - LookAtCoord.X, 2)
-                     + Math.Pow(EyeCoord.Y - LookAtCoord.Y, 2)
-                     + Math.Pow(EyeCoord.Z - LookAtCoord.Z, 2));
+            _radius = Math.Sqrt(Math.Pow(EyeCoord.X - _lookAtCoord.X, 2)
+                     + Math.Pow(EyeCoord.Y - _lookAtCoord.Y, 2)
+                     + Math.Pow(EyeCoord.Z - _lookAtCoord.Z, 2));
         }
 
         /*
@@ -101,42 +78,44 @@ namespace ObjectBuilder
          * Using theta and phi to calculate rotate transform of the camera using vector.
          * ref: https://stackoverflow.com/questions/20759214/rotating-a-3d-vector-without-a-matrix-opengl
          */
-        public void RotateCamera(string RotateMode)
+        public void Rotate(CameraRotate mode)
         {
-            switch (RotateMode)
+            switch (mode)
             {
-                case "Right":
-                    theta += CameraUnit;
-                    EyeCoord.X = LookAtCoord.X + radius * Math.Cos(phi) * Math.Sin(theta);
-                    EyeCoord.Z = LookAtCoord.Z + radius * Math.Cos(phi) * Math.Cos(theta);
+                case CameraRotate.Right:
+                    _theta += _cameraUnit;
+                    EyeCoord.X = _lookAtCoord.X + _radius * Math.Cos(_phi) * Math.Sin(_theta);
+                    EyeCoord.Z = _lookAtCoord.Z + _radius * Math.Cos(_phi) * Math.Cos(_theta);
                     break;
 
-                case "Left":
-                    theta -= CameraUnit;
-                    EyeCoord.X = LookAtCoord.X + radius * Math.Cos(phi) * Math.Sin(theta);
-                    EyeCoord.Z =LookAtCoord.Z + radius * Math.Cos(phi) * Math.Cos(theta);
-                    break;
-                case "Up":
-                    phi += CameraUnit;
-                    EyeCoord.Y = LookAtCoord.Y + radius * Math.Sin(phi);
-                    EyeCoord.X = LookAtCoord.X + radius * Math.Cos(phi) * Math.Sin(theta);
-                    EyeCoord.Z = LookAtCoord.Z + radius * Math.Cos(phi) * Math.Cos(theta);
+                case CameraRotate.Left:
+                    _theta -= _cameraUnit;
+                    EyeCoord.X = _lookAtCoord.X + _radius * Math.Cos(_phi) * Math.Sin(_theta);
+                    EyeCoord.Z =_lookAtCoord.Z + _radius * Math.Cos(_phi) * Math.Cos(_theta);
                     break;
 
-                case "Down":
-                    phi -= CameraUnit;
-                    EyeCoord.Y = LookAtCoord.Y + radius * Math.Sin(phi);
-                    EyeCoord.X = LookAtCoord.X + radius * Math.Cos(phi) * Math.Sin(theta);
-                    EyeCoord.Z = LookAtCoord.Z + radius * Math.Cos(phi) * Math.Cos(theta);
+                case CameraRotate.Up:
+                    _phi += _cameraUnit;
+                    EyeCoord.Y = _lookAtCoord.Y + _radius * Math.Sin(_phi);
+                    EyeCoord.X = _lookAtCoord.X + _radius * Math.Cos(_phi) * Math.Sin(_theta);
+                    EyeCoord.Z = _lookAtCoord.Z + _radius * Math.Cos(_phi) * Math.Cos(_theta);
                     break;
+
+                case CameraRotate.Down:
+                    _phi -= _cameraUnit;
+                    EyeCoord.Y = _lookAtCoord.Y + _radius * Math.Sin(_phi);
+                    EyeCoord.X = _lookAtCoord.X + _radius * Math.Cos(_phi) * Math.Sin(_theta);
+                    EyeCoord.Z = _lookAtCoord.Z + _radius * Math.Cos(_phi) * Math.Cos(_theta);
+                    break;
+
                 default:
-                    break;
+                    throw new NotImplementedException($"{mode}");
             }
         }
 
         public void UpdateLookAt(OpenGL gl)
         {
-            gl.LookAt(EyeCoord.X, EyeCoord.Y, EyeCoord.Z, LookAtCoord.X, LookAtCoord.Y, LookAtCoord.Z, 0.0f, 1.0f, 0.0f);
+            gl.LookAt(EyeCoord.X, EyeCoord.Y, EyeCoord.Z, _lookAtCoord.X, _lookAtCoord.Y, _lookAtCoord.Z, 0.0f, 1.0f, 0.0f);
         }
     }
 }
