@@ -35,7 +35,6 @@ namespace ObjectBuilder
             CalculateSphereFields();
         }
 
-        //string mode: In/Out
         public void Zoom(CameraZoom mode)
         {
             switch (mode)
@@ -73,11 +72,7 @@ namespace ObjectBuilder
                      + Math.Pow(EyeCoord.Z - _lookAtCoord.Z, 2));
         }
 
-        /*
-         * string mode: Right/Left/Up/Down
-         * Using theta and phi to calculate rotate transform of the camera using vector.
-         * ref: https://stackoverflow.com/questions/20759214/rotating-a-3d-vector-without-a-matrix-opengl
-         */
+         // ref: https://stackoverflow.com/questions/20759214/rotating-a-3d-vector-without-a-matrix-opengl
         public void Rotate(CameraRotate mode)
         {
             switch (mode)
